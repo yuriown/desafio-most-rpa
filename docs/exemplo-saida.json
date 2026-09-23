@@ -1,0 +1,144 @@
+{
+  "id_consulta": "24568b11d2884a519a8523bb8af0db33",
+  "status": "sucesso",
+  "data_hora_consulta": "2026-09-23T18:31:42.641786-03:00",
+  "duracao_segundos": 2.94,
+  "parametros": {
+    "termo": "FULANO DE TAL",
+    "tipo_termo": "nome",
+    "filtro_beneficiario_programa_social": false
+  },
+  "codigo_erro": null,
+  "mensagem": null,
+  "total_resultados_busca": 1,
+  "url_pessoa": "https://portal.teste/busca/pessoa-fisica/1-fulano-de-tal",
+  "pessoa": {
+    "nome": "FULANO DE TAL",
+    "cpf": "***.111.222-**",
+    "localidade": "CIDADE A - UF",
+    "campos": {
+      "Nome": "FULANO DE TAL",
+      "CPF": "***.111.222-**",
+      "Localidade": "CIDADE A - UF"
+    }
+  },
+  "panorama": [
+    {
+      "titulo": "Recebimentos de recursos",
+      "tabelas": [
+        {
+          "rotulo": "Bolsa Família",
+          "colunas": [
+            "NIS",
+            "Nome",
+            "Valor Recebido"
+          ],
+          "linhas": [
+            {
+              "detalhe_url": "https://portal.teste/beneficios/bolsa-familia/11",
+              "NIS": "1.234.567.890-1",
+              "Nome": "FULANO DE TAL",
+              "Valor Recebido": "R$ 1.000,00"
+            }
+          ]
+        },
+        {
+          "rotulo": "Auxílio Emergencial",
+          "colunas": [
+            "NIS",
+            "Nome",
+            "Valor Recebido"
+          ],
+          "linhas": [
+            {
+              "detalhe_url": "https://portal.teste/beneficios/auxilio-emergencial/22",
+              "NIS": "1.234.567.890-1",
+              "Nome": "FULANO DE TAL",
+              "Valor Recebido": "R$ 1.000,00"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "beneficios": [
+    {
+      "programa": "Bolsa Família",
+      "url": "https://portal.teste/beneficios/bolsa-familia/11",
+      "identificacao": {
+        "Nome": "BENEFICIARIO",
+        "NIS": "1.234.567.890-1"
+      },
+      "tabelas": [
+        {
+          "nome": "recebido",
+          "endpoint": "/beneficios/bolsa-familia/recebido/resultado",
+          "total_registros": 23,
+          "completa": true,
+          "registros": [
+            {
+              "mes": "01/2024",
+              "valor": "100,00"
+            },
+            {
+              "mes": "02/2024",
+              "valor": "100,00"
+            },
+            "...(truncado no exemplo)"
+          ]
+        },
+        {
+          "nome": "sacado",
+          "endpoint": "/beneficios/bolsa-familia/sacado/resultado",
+          "total_registros": 7,
+          "completa": true,
+          "registros": [
+            {
+              "mes": "01/2024",
+              "valor": "100,00"
+            },
+            {
+              "mes": "02/2024",
+              "valor": "100,00"
+            },
+            "...(truncado no exemplo)"
+          ]
+        }
+      ],
+      "erro": null
+    },
+    {
+      "programa": "Auxílio Emergencial",
+      "url": "https://portal.teste/beneficios/auxilio-emergencial/22",
+      "identificacao": {
+        "Nome": "BENEFICIARIO",
+        "NIS": "1.234.567.890-1"
+      },
+      "tabelas": [
+        {
+          "nome": "recebido",
+          "endpoint": "/beneficios/auxilio-emergencial/recebido/resultado",
+          "total_registros": 14,
+          "completa": true,
+          "registros": [
+            {
+              "mes": "01/2024",
+              "valor": "100,00"
+            },
+            {
+              "mes": "02/2024",
+              "valor": "100,00"
+            },
+            "...(truncado no exemplo)"
+          ]
+        }
+      ],
+      "erro": null
+    }
+  ],
+  "evidencia": {
+    "formato": "png",
+    "tela": "panorama da pessoa",
+    "base64": "iVBORw0KGgoAAAANSUhEUgAABVYAAAOECAIAAADFff1bAAAQAElEQVR4nOzd...(truncado no exemplo)"
+  }
+}
