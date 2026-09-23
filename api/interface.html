@@ -36,6 +36,8 @@
   button { font: inherit; font-weight: 600; border-radius: 8px; cursor: pointer; }
   .principal { background: var(--primaria); color: var(--primaria-texto); border: 0; padding: 10px 20px; }
   .secundario { background: transparent; color: var(--texto); border: 1px solid var(--borda); padding: 6px 12px; font-size: 13px; }
+  .chave { grid-column: 1 / -1; font-weight: 600; }
+  .chave small { font-weight: 400; color: var(--suave); }
   .dica { grid-column: 1 / -1; margin: 0; font-size: 13px; color: var(--suave); }
   #vazio { color: var(--suave); text-align: center; padding: 32px 0; }
   .consulta { background: var(--cartao); border: 1px solid var(--borda); border-radius: 10px; margin-top: 16px; overflow: hidden; }
@@ -80,6 +82,9 @@
     </label>
     <button class="principal" type="submit">Consultar</button>
     <label class="filtro"><input type="checkbox" id="filtro"> Beneficiário de Programa Social</label>
+    <label class="campo chave">Chave da API <small>(só se o servidor tiver ROBO_API_KEY)</small>
+      <input type="text" id="chave" placeholder="X-API-Key" spellcheck="false">
+    </label>
     <p class="dica">Cada consulta roda em paralelo: dá para disparar várias sem esperar a anterior terminar.</p>
   </form>
 
@@ -95,15 +100,9 @@ const el = (tag, props = {}, ...filhos) => {
   return e;
 };
 
-function nomeDoArquivo(r) {
-  // Mesmo padrão da CLI: <id_consulta>_<AAAAMMDD_HHMMSS>.json
-  const d = r.data_hora_consulta.replace(/[-:]/g, "");
-  return `${r.id_consulta}_${d.slice(0, 8)}_${d.slice(9, 15)}.json`;
-}
-
 function baixar(r) {
   const blob = new Blob([JSON.stringify(r, null, 2)], { type: "application/json" });
-  const a = el("a", { href: URL.createObjectURL(blob), download: nomeDoArquivo(r) });
+  const a = el("a", { href: URL.createObjectURL(blob), download: r.nome_arquivo });
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
@@ -216,9 +215,10 @@ async function consultar(termo, filtro) {
   }, 1000);
 
   try {
+    const chave = $("#chave").value.trim();
     const resposta = await fetch("/consultas", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(chave ? { "X-API-Key": chave } : {}) },
       body: JSON.stringify({ termo, filtro_beneficiario_programa_social: filtro }),
     });
     const dados = await resposta.json().catch(() => null);
@@ -233,6 +233,12 @@ async function consultar(termo, filtro) {
     clearInterval(relogio);
   }
 }
+
+// A chave fica guardada só neste navegador, por conveniência; sem armazenamento, a página funciona igual.
+try { $("#chave").value = localStorage.getItem("robo-chave-api") || ""; } catch {}
+$("#chave").addEventListener("change", () => {
+  try { localStorage.setItem("robo-chave-api", $("#chave").value.trim()); } catch {}
+});
 
 $("#formulario").addEventListener("submit", (ev) => {
   ev.preventDefault();

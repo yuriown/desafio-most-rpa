@@ -90,7 +90,7 @@ async def executar_consulta(
     entrada: ConsultaEntrada,
 ) -> ResultadoConsulta:
     id_consulta = uuid.uuid4().hex
-    inicio = datetime.now(FUSO)
+    inicio = datetime.now(FUSO).replace(microsecond=0)
     t0 = time.perf_counter()
     parametros = Parametros(
         termo=entrada.termo,

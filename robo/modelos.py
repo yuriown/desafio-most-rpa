@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 
 class ConsultaEntrada(BaseModel):
@@ -86,3 +86,8 @@ class ResultadoConsulta(BaseModel):
     panorama: list[SecaoPanorama] = Field(default_factory=list)
     beneficios: list[DetalheBeneficio] = Field(default_factory=list)
     evidencia: Evidencia | None = None
+
+    @computed_field(description="Nome padrão do arquivo desta consulta: <id_consulta>_<AAAAMMDD_HHMMSS>.json")
+    @property
+    def nome_arquivo(self) -> str:
+        return f"{self.id_consulta}_{self.data_hora_consulta:%Y%m%d_%H%M%S}.json"

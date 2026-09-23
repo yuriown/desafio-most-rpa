@@ -7,7 +7,14 @@ relação da pessoa com o Governo Federal, captura a tela como evidência (PNG e
 entra no detalhe de cada benefício e devolve tudo em **JSON**.
 
 Roda em **modo headless**, aceita **execuções simultâneas** e é exposto como **API HTTP
-documentada em Swagger/OpenAPI**.
+documentada em Swagger/OpenAPI**, com uma interface web.
+
+**Parte 2 (bônus):** um cenário do **Make.com** chama a API, salva o JSON no **Google Drive**
+como `[id]_[AAAAMMDD_HHMMSS].json` e registra a consulta no **Google Sheets**. Guia em
+[docs/PARTE2.md](docs/PARTE2.md) e cenário pronto para importar em
+[docs/make-blueprint.json](docs/make-blueprint.json).
+
+Decisões técnicas, desafios e a escolha da plataforma: [docs/RELATORIO.md](docs/RELATORIO.md).
 
 > ⚠️ **Limitação conhecida:** o portal está atrás do AWS WAF, que às vezes exige
 > verificação humana (CAPTCHA) de navegadores headless. Quando isso acontece o robô
@@ -88,7 +95,22 @@ curl -X POST http://localhost:8000/consultas \
 | HTTP | Quando |
 |---|---|
 | 200 | Consulta concluída — **inclusive** erros do portal (sem resultados, tempo esgotado, bloqueio anti-bot), com `status: "erro"`. Assim um workflow sempre recebe um JSON para arquivar. |
+| 401 | `ROBO_API_KEY` está definida e o cabeçalho `X-API-Key` não confere. |
 | 422 | Termo inválido (vazio, CPF/NIS sem 11 dígitos, nome com números). Não ocupa navegador. |
+
+**Chave de API:** com `ROBO_API_KEY` no `.env`, `POST /consultas` exige o cabeçalho
+`X-API-Key` (no Swagger, botão *Authorize*; na interface, campo "Chave da API"). Sem a
+variável, a API fica aberta, o que só serve para uso local. **Defina a chave antes de expor a
+API na internet.**
+
+### API pública para o workflow (Parte 2)
+
+```bash
+powershell -ExecutionPolicy Bypass -File scripts\demo.ps1
+```
+
+Sobe a API e um túnel do Cloudflare e mostra o endereço público. Detalhes em
+[docs/PARTE2.md](docs/PARTE2.md).
 
 ### Docker
 
@@ -112,6 +134,7 @@ Exemplo completo (gerado com dados fictícios): [docs/exemplo-saida.json](docs/e
 | `panorama` | Seções do panorama com as tabelas lidas célula a célula |
 | `beneficios` | Por benefício: identificação e as tabelas de parcelas completas |
 | `evidencia` | `{formato: "png", tela, base64}` — também presente em erros, quando possível |
+| `nome_arquivo` | `<id_consulta>_<AAAAMMDD_HHMMSS>.json`, o nome padrão do arquivo desta consulta |
 
 ### Cenários de teste do desafio
 
@@ -132,7 +155,7 @@ Outros códigos de erro: `tempo_esgotado` (mesma mensagem de tempo de resposta),
 pytest
 ```
 
-40 testes, **sem acesso à internet**. O fluxo completo (cliques, busca por XHR, acordeões,
+46 testes, **sem acesso à internet**. O fluxo completo (cliques, busca por XHR, acordeões,
 paginação, evidência) roda contra um **portal falso** servido pelo roteamento do Playwright
 ([tests/portal_falso.py](tests/portal_falso.py)), que reproduz a estrutura do portal real
 com dados fictícios. Cobre os cinco cenários acima, o CAPTCHA, o tempo esgotado e quatro
@@ -153,5 +176,6 @@ robo/
 api/main.py      FastAPI
 api/interface.html  página web servida em /
 tests/           unitários + fluxo completo no portal falso
-docs/            relatório técnico e exemplo de saída
+scripts/         demo.ps1 (API + túnel) e o gerador do blueprint do Make
+docs/            relatório, guia da Parte 2, blueprint do Make e exemplo de saída
 ```

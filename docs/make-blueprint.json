@@ -1,0 +1,206 @@
+{
+  "name": "Robô Transparência: consulta, Drive e Sheets",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Recebe a consulta"
+        },
+        "restore": {
+          "parameters": {
+            "hook": {
+              "data": {
+                "editable": "true"
+              },
+              "label": "consulta-robo"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "hook",
+            "type": "hook:gateway-webhook",
+            "label": "Webhook",
+            "required": true
+          },
+          {
+            "name": "maxResults",
+            "type": "number",
+            "label": "Maximum number of results"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {
+        "handleErrors": true
+      },
+      "mapper": {
+        "url": "<ENDERECO_DO_TUNEL>/consultas",
+        "method": "post",
+        "headers": [
+          {
+            "name": "X-API-Key",
+            "value": "<ROBO_API_KEY>"
+          }
+        ],
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "data": "{\"termo\": \"{{1.termo}}\", \"filtro_beneficiario_programa_social\": {{if(1.filtro; true; false)}}}",
+        "parseResponse": false,
+        "timeout": "300"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Chama o robô"
+        },
+        "notes": "Troque <ENDERECO_DO_TUNEL> e <ROBO_API_KEY>."
+      }
+    },
+    {
+      "id": 3,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{2.data}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Lê o resultado"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "google-drive:uploadAFile",
+      "version": 4,
+      "parameters": {},
+      "mapper": {
+        "select": "value",
+        "filename": "{{3.nome_arquivo}}",
+        "data": "{{2.data}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Salva o JSON no Drive"
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "notes": "Conecte o Google e escolha a pasta Consultas Robô."
+      }
+    },
+    {
+      "id": 5,
+      "module": "google-sheets:addRow",
+      "version": 2,
+      "parameters": {},
+      "mapper": {
+        "mode": "select",
+        "from": "drive",
+        "spreadsheetId": "",
+        "sheetId": "",
+        "includesHeaders": true,
+        "insertDataOption": "INSERT_ROWS",
+        "valueInputOption": "USER_ENTERED",
+        "values": {
+          "0": "{{3.id_consulta}}",
+          "1": "{{3.data_hora_consulta}}",
+          "2": "{{3.pessoa.nome}}",
+          "3": "{{3.pessoa.cpf}}",
+          "4": "{{3.parametros.termo}}",
+          "5": "{{3.status}}",
+          "6": "{{3.mensagem}}",
+          "7": "https://drive.google.com/file/d/{{4.id}}/view"
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Registra na planilha"
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:google",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "notes": "Escolha a planilha Registro de consultas (cabeçalho na linha 1)."
+      }
+    },
+    {
+      "id": 6,
+      "module": "gateway:WebhookRespond",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "status": "200",
+        "body": "{\"id_consulta\": \"{{3.id_consulta}}\", \"status\": \"{{3.status}}\", \"codigo_erro\": \"{{3.codigo_erro}}\", \"link_json\": \"https://drive.google.com/file/d/{{4.id}}/view\"}",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "Responde a quem chamou"
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      "Importe em: cenário novo > menu ... > Import Blueprint.",
+      "Depois: crie o webhook no módulo 1, preencha URL e chave no módulo 2, conecte o Google nos módulos 4 e 5 e escolha a pasta e a planilha.",
+      "Passo a passo completo em docs/PARTE2.md."
+    ]
+  }
+}

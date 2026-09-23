@@ -14,12 +14,8 @@ from pathlib import Path
 
 from .config import carregar_config
 from .consulta import executar_consulta
-from .modelos import ConsultaEntrada, ResultadoConsulta
+from .modelos import ConsultaEntrada
 from .navegador import GerenciadorNavegador
-
-
-def nome_do_arquivo(resultado: ResultadoConsulta) -> str:
-    return f"{resultado.id_consulta}_{resultado.data_hora_consulta:%Y%m%d_%H%M%S}.json"
 
 
 async def _rodar(termos: list[str], filtro: bool, saida: Path) -> int:
@@ -35,7 +31,7 @@ async def _rodar(termos: list[str], filtro: bool, saida: Path) -> int:
 
     saida.mkdir(parents=True, exist_ok=True)
     for r in resultados:
-        arquivo = saida / nome_do_arquivo(r)
+        arquivo = saida / r.nome_arquivo
         arquivo.write_text(r.model_dump_json(indent=2), encoding="utf-8")
         resumo = r.pessoa.nome if r.pessoa else r.mensagem
         print(f"{r.status:8} {r.duracao_segundos:6.1f}s  {r.parametros.termo!r} -> {resumo}  [{arquivo}]")

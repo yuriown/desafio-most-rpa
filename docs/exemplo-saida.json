@@ -1,8 +1,8 @@
 {
-  "id_consulta": "24568b11d2884a519a8523bb8af0db33",
+  "id_consulta": "7a4c260845374f489a96b641f6074ffe",
   "status": "sucesso",
-  "data_hora_consulta": "2026-09-23T18:31:42.641786-03:00",
-  "duracao_segundos": 2.94,
+  "data_hora_consulta": "2026-09-23T18:55:31-03:00",
+  "duracao_segundos": 1.62,
   "parametros": {
     "termo": "FULANO DE TAL",
     "tipo_termo": "nome",
@@ -140,5 +140,6 @@
     "formato": "png",
     "tela": "panorama da pessoa",
     "base64": "iVBORw0KGgoAAAANSUhEUgAABVYAAAOECAIAAADFff1bAAAQAElEQVR4nOzd...(truncado no exemplo)"
-  }
+  },
+  "nome_arquivo": "7a4c260845374f489a96b641f6074ffe_20260923_185531.json"
 }
