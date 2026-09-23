@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robô Transparência</title>
+<style>
+  :root {
+    --fundo: #f5f6f8; --cartao: #ffffff; --texto: #1c2430; --suave: #5d6878; --borda: #dde1e7;
+    --primaria: #1351b4; --primaria-texto: #ffffff; --ok: #16803c; --ok-fundo: #e6f4ea;
+    --erro: #b3261e; --erro-fundo: #fbe9e7; --andamento: #8a5a00; --andamento-fundo: #fff4d6;
+    --codigo: #f0f2f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fundo: #12161c; --cartao: #1b2129; --texto: #e6e9ee; --suave: #9aa4b2; --borda: #2c3440;
+      --primaria: #5b8def; --primaria-texto: #0b1020; --ok: #5fd08a; --ok-fundo: #173323;
+      --erro: #f28b82; --erro-fundo: #3a1d1b; --andamento: #f3c969; --andamento-fundo: #3a2f12;
+      --codigo: #232a34;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fundo); color: var(--texto);
+         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--suave); margin: 0 0 20px; }
+  .sub a { color: var(--primaria); }
+  form { background: var(--cartao); border: 1px solid var(--borda); border-radius: 10px; padding: 16px;
+         display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end; }
+  label.campo { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: 13px; }
+  input[type=text] { font: inherit; padding: 10px 12px; border: 1px solid var(--borda); border-radius: 8px;
+                     background: var(--fundo); color: var(--texto); width: 100%; }
+  input[type=text]:focus { outline: 2px solid var(--primaria); outline-offset: 1px; }
+  .filtro { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; color: var(--suave); }
+  button { font: inherit; font-weight: 600; border-radius: 8px; cursor: pointer; }
+  .principal { background: var(--primaria); color: var(--primaria-texto); border: 0; padding: 10px 20px; }
+  .secundario { background: transparent; color: var(--texto); border: 1px solid var(--borda); padding: 6px 12px; font-size: 13px; }
+  .dica { grid-column: 1 / -1; margin: 0; font-size: 13px; color: var(--suave); }
+  #vazio { color: var(--suave); text-align: center; padding: 32px 0; }
+  .consulta { background: var(--cartao); border: 1px solid var(--borda); border-radius: 10px; margin-top: 16px; overflow: hidden; }
+  .topo { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--borda); }
+  .termo { font-weight: 700; word-break: break-word; }
+  .etiqueta { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: .03em; }
+  .andamento { color: var(--andamento); background: var(--andamento-fundo); }
+  .sucesso { color: var(--ok); background: var(--ok-fundo); }
+  .erro { color: var(--erro); background: var(--erro-fundo); }
+  .tempo { color: var(--suave); font-size: 13px; font-variant-numeric: tabular-nums; margin-left: auto; }
+  .corpo { padding: 16px; display: grid; gap: 16px; }
+  /* Sem isto, a tabela mais larga alarga a grade inteira e estoura o cartão no celular. */
+  .corpo > * { min-width: 0; }
+  .mensagem { padding: 10px 12px; border-radius: 8px; background: var(--erro-fundo); color: var(--erro); }
+  .mensagem code { color: inherit; }
+  .pessoa { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+  .pessoa div span { display: block; font-size: 12px; color: var(--suave); }
+  h3 { font-size: 14px; margin: 0 0 8px; }
+  .tabela { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--borda); white-space: nowrap; }
+  th { color: var(--suave); font-weight: 600; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  a { color: var(--primaria); }
+  .evidencia img { max-width: 100%; max-height: 360px; border: 1px solid var(--borda); border-radius: 6px; cursor: zoom-in; display: block; }
+  .acoes { display: flex; flex-wrap: wrap; gap: 8px; }
+  pre { background: var(--codigo); padding: 12px; border-radius: 8px; overflow: auto; max-height: 420px; font-size: 12px; margin: 8px 0 0; }
+  .girando { width: 14px; height: 14px; border: 2px solid var(--andamento-fundo); border-top-color: var(--andamento);
+             border-radius: 50%; animation: gira 0.8s linear infinite; }
+  @keyframes gira { to { transform: rotate(360deg); } }
+  @media (max-width: 560px) { form { grid-template-columns: 1fr; } .principal { width: 100%; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Robô Portal da Transparência</h1>
+  <p class="sub">Consulta de pessoa física por nome, CPF ou NIS. <a href="/docs">Documentação da API</a></p>
+
+  <form id="formulario" autocomplete="off">
+    <label class="campo">Nome, CPF ou NIS
+      <input type="text" id="termo" required maxlength="200" placeholder="Ex.: MARIA DA SILVA ou 123.456.789-09">
+    </label>
+    <button class="principal" type="submit">Consultar</button>
+    <label class="filtro"><input type="checkbox" id="filtro"> Beneficiário de Programa Social</label>
+    <p class="dica">Cada consulta roda em paralelo: dá para disparar várias sem esperar a anterior terminar.</p>
+  </form>
+
+  <p id="vazio">Nenhuma consulta ainda.</p>
+  <section id="consultas" aria-live="polite"></section>
+</main>
+
+<script>
+const $ = (seletor, raiz = document) => raiz.querySelector(seletor);
+const el = (tag, props = {}, ...filhos) => {
+  const e = Object.assign(document.createElement(tag), props);
+  e.append(...filhos.filter(f => f !== null && f !== undefined));
+  return e;
+};
+
+function nomeDoArquivo(r) {
+  // Mesmo padrão da CLI: <id_consulta>_<AAAAMMDD_HHMMSS>.json
+  const d = r.data_hora_consulta.replace(/[-:]/g, "");
+  return `${r.id_consulta}_${d.slice(0, 8)}_${d.slice(9, 15)}.json`;
+}
+
+function baixar(r) {
+  const blob = new Blob([JSON.stringify(r, null, 2)], { type: "application/json" });
+  const a = el("a", { href: URL.createObjectURL(blob), download: nomeDoArquivo(r) });
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+function jsonParaTela(r) {
+  // O Base64 da imagem tem centenas de KB; na tela, só o começo.
+  const copia = structuredClone(r);
+  if (copia.evidencia) copia.evidencia.base64 = copia.evidencia.base64.slice(0, 80) + "… (completo no download)";
+  return JSON.stringify(copia, null, 2);
+}
+
+function tabelaDoPanorama(t) {
+  const colunas = t.colunas;
+  return el("div", { className: "tabela" },
+    el("table", {},
+      el("thead", {}, el("tr", {}, ...colunas.map(c => el("th", { textContent: c })), el("th"))),
+      el("tbody", {}, ...t.linhas.map(l => el("tr", {},
+        ...colunas.map(c => el("td", { textContent: l[c] ?? "" })),
+        el("td", {}, l.detalhe_url ? el("a", { href: l.detalhe_url, target: "_blank", rel: "noopener", textContent: "ver no portal" }) : null),
+      ))),
+    ));
+}
+
+function renderizarResultado(cartao, r) {
+  const etiqueta = $(".etiqueta.status", cartao);
+  etiqueta.className = `etiqueta status ${r.status}`;
+  etiqueta.textContent = r.status;
+  $(".tempo", cartao).textContent = `${r.duracao_segundos.toFixed(1)} s`;
+
+  const corpo = $(".corpo", cartao);
+  corpo.replaceChildren();
+
+  if (r.status === "erro") {
+    corpo.append(el("div", { className: "mensagem" }, el("code", { textContent: r.codigo_erro }), " · ", r.mensagem));
+  }
+
+  if (r.pessoa) {
+    const campo = (rotulo, valor) => el("div", {}, el("span", { textContent: rotulo }), valor || "—");
+    corpo.append(el("div", { className: "pessoa" },
+      campo("Nome", r.pessoa.nome), campo("CPF", r.pessoa.cpf), campo("Localidade", r.pessoa.localidade),
+      r.total_resultados_busca != null ? campo("Resultados da busca", r.total_resultados_busca.toLocaleString("pt-BR")) : null,
+    ));
+  }
+
+  for (const secao of r.panorama) {
+    for (const t of secao.tabelas) {
+      corpo.append(el("div", {}, el("h3", { textContent: `${secao.titulo} · ${t.rotulo ?? ""}` }), tabelaDoPanorama(t)));
+    }
+  }
+
+  if (r.beneficios.length) {
+    corpo.append(el("div", {},
+      el("h3", { textContent: "Detalhe dos benefícios" }),
+      el("div", { className: "tabela" }, el("table", {},
+        el("thead", {}, el("tr", {}, ...["Programa", "Conjunto", "Parcelas", ""].map(c => el("th", { textContent: c })))),
+        el("tbody", {}, ...r.beneficios.flatMap(b => b.erro
+          ? [el("tr", {}, el("td", { textContent: b.programa }), el("td", { colSpan: 3, textContent: `falhou: ${b.erro}` }))]
+          : b.tabelas.map((t, i) => el("tr", {},
+              el("td", { textContent: i === 0 ? b.programa : "" }),
+              el("td", { textContent: t.nome }),
+              el("td", { className: "num", textContent: `${t.total_registros}${t.completa ? "" : " (parcial)"}` }),
+              el("td", {}, i === 0 ? el("a", { href: b.url, target: "_blank", rel: "noopener", textContent: "ver no portal" }) : null),
+            )))),
+      )),
+    ));
+  }
+
+  if (r.evidencia) {
+    const src = `data:image/png;base64,${r.evidencia.base64}`;
+    const img = el("img", { src, alt: `Evidência: ${r.evidencia.tela}`, title: "Abrir em tamanho real" });
+    img.addEventListener("click", () => { const w = window.open(); if (w) w.document.write(`<img src="${src}">`); });
+    corpo.append(el("div", { className: "evidencia" }, el("h3", { textContent: `Evidência (${r.evidencia.tela})` }), img));
+  }
+
+  const pre = el("pre", { hidden: true });
+  const verJson = el("button", { className: "secundario", type: "button", textContent: "Ver JSON" });
+  verJson.addEventListener("click", () => {
+    if (!pre.textContent) pre.textContent = jsonParaTela(r);
+    pre.hidden = !pre.hidden;
+    verJson.textContent = pre.hidden ? "Ver JSON" : "Ocultar JSON";
+  });
+  const baixarJson = el("button", { className: "secundario", type: "button", textContent: "Baixar JSON" });
+  baixarJson.addEventListener("click", () => baixar(r));
+  corpo.append(el("div", {}, el("div", { className: "acoes" }, verJson, baixarJson), pre));
+}
+
+function renderizarFalha(cartao, texto) {
+  const etiqueta = $(".etiqueta.status", cartao);
+  etiqueta.className = "etiqueta status erro";
+  etiqueta.textContent = "erro";
+  $(".corpo", cartao).replaceChildren(el("div", { className: "mensagem", textContent: texto }));
+}
+
+async function consultar(termo, filtro) {
+  $("#vazio").hidden = true;
+  const cartao = el("article", { className: "consulta" },
+    el("div", { className: "topo" },
+      el("span", { className: "termo", textContent: termo }),
+      filtro ? el("span", { className: "etiqueta andamento", textContent: "filtro social" }) : null,
+      el("span", { className: "etiqueta status andamento", textContent: "consultando" }),
+      el("span", { className: "tempo", textContent: "0 s" }),
+    ),
+    el("div", { className: "corpo" }, el("div", { className: "girando", role: "status", ariaLabel: "consultando" })),
+  );
+  $("#consultas").prepend(cartao);
+
+  const inicio = performance.now();
+  const relogio = setInterval(() => {
+    $(".tempo", cartao).textContent = `${Math.round((performance.now() - inicio) / 1000)} s`;
+  }, 1000);
+
+  try {
+    const resposta = await fetch("/consultas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ termo, filtro_beneficiario_programa_social: filtro }),
+    });
+    const dados = await resposta.json().catch(() => null);
+    if (resposta.ok) renderizarResultado(cartao, dados);
+    else renderizarFalha(cartao, typeof dados?.detail === "string" ? dados.detail : `A API respondeu HTTP ${resposta.status}.`);
+  } catch (e) {
+    // "Failed to fetch" do navegador quase sempre quer dizer que o servidor caiu ou não subiu.
+    renderizarFalha(cartao, location.protocol === "file:"
+      ? "Esta página foi aberta como arquivo. Suba a API (uvicorn api.main:app) e abra o endereço dela, ex.: http://localhost:8000/"
+      : `A API em ${location.origin} não respondeu. Confira se o servidor (uvicorn) está rodando. (${e.message})`);
+  } finally {
+    clearInterval(relogio);
+  }
+}
+
+$("#formulario").addEventListener("submit", (ev) => {
+  ev.preventDefault();
+  const termo = $("#termo").value.trim();
+  if (!termo) return;
+  consultar(termo, $("#filtro").checked);
+  $("#termo").value = "";
+  $("#termo").focus();
+});
+</script>
+</body>
+</html>

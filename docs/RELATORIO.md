@@ -50,6 +50,13 @@ Com a Parte 2 em vista, a API responde **200 com `status: "erro"`** para os erro
 o workflow sempre recebe um JSON para arquivar no Drive, com evidência da tela quando
 possível. Só termo inválido volta 422, e sem ocupar um navegador.
 
+### Interface web servida pela própria API
+Além da API com Swagger (o diferencial pedido), a API serve em `/` uma página simples para
+usar o robô sem montar requisições. É HTML e JavaScript puros, sem etapa de build: um
+formulário com o termo e o filtro, e um cartão por consulta com cronômetro, resultado,
+evidência e download do JSON. Como cada envio é uma requisição independente, dá para
+disparar várias consultas seguidas, o que serve para demonstrar a execução simultânea.
+
 ### Configuração e segurança
 Toda a configuração vem de variáveis de ambiente (`.env.example`), sem nada fixo no código.
 O robô não usa credenciais. No banner de cookies, escolhe **rejeitar os opcionais**. Nos logs,

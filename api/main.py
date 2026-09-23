@@ -8,8 +8,10 @@ from __future__ import annotations
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse
 
 from robo import ConsultaEntrada, GerenciadorNavegador, ResultadoConsulta, carregar_config, executar_consulta
 from robo.erros import TermoInvalido
@@ -42,6 +44,15 @@ app = FastAPI(
     ),
     lifespan=ciclo_de_vida,
 )
+
+
+INTERFACE = Path(__file__).with_name("interface.html")
+
+
+@app.get("/", include_in_schema=False)
+async def interface() -> FileResponse:
+    """Página web para usar o robô sem montar requisições à mão."""
+    return FileResponse(INTERFACE, media_type="text/html; charset=utf-8")
 
 
 @app.get("/saude", summary="Verificação de vida da API")

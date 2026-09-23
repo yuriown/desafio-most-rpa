@@ -42,6 +42,18 @@ Copie para `.env` para ajustar tempo limite, paralelismo etc.
 
 ## Uso
 
+### Interface web
+
+Com a API no ar (veja abaixo), abra <http://localhost:8000/>. É uma página simples, servida
+pela própria API:
+
+- campo para nome, CPF ou NIS e a caixa do filtro **Beneficiário de Programa Social**;
+- cada consulta vira um cartão com cronômetro. Dá para disparar várias sem esperar, e elas
+  rodam em paralelo;
+- no fim, o cartão mostra a pessoa, as tabelas do panorama, as parcelas coletadas de cada
+  benefício e a imagem de evidência (clique para ampliar), além dos botões **Ver JSON** e
+  **Baixar JSON** (`<id_consulta>_<AAAAMMDD_HHMMSS>.json`).
+
 ### Linha de comando
 
 ```bash
@@ -63,7 +75,7 @@ python -m robo 12345678909 "NOME INEXISTENTE XYZ" SOUZA --filtro-social -v
 uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
 
-- Swagger: <http://localhost:8000/docs> · ReDoc: <http://localhost:8000/redoc>
+- Interface: <http://localhost:8000/> · Swagger: <http://localhost:8000/docs> · ReDoc: <http://localhost:8000/redoc>
 - `GET /saude` — verificação de vida
 - `POST /consultas`
 
@@ -120,7 +132,7 @@ Outros códigos de erro: `tempo_esgotado` (mesma mensagem de tempo de resposta),
 pytest
 ```
 
-39 testes, **sem acesso à internet**. O fluxo completo (cliques, busca por XHR, acordeões,
+40 testes, **sem acesso à internet**. O fluxo completo (cliques, busca por XHR, acordeões,
 paginação, evidência) roda contra um **portal falso** servido pelo roteamento do Playwright
 ([tests/portal_falso.py](tests/portal_falso.py)), que reproduz a estrutura do portal real
 com dados fictícios. Cobre os cinco cenários acima, o CAPTCHA, o tempo esgotado e quatro
@@ -139,6 +151,7 @@ robo/
   modelos.py     schema de entrada/saída (também o do Swagger)
   __main__.py    CLI
 api/main.py      FastAPI
+api/interface.html  página web servida em /
 tests/           unitários + fluxo completo no portal falso
 docs/            relatório técnico e exemplo de saída
 ```

@@ -24,6 +24,13 @@ def cliente(monkeypatch):
         yield c
 
 
+def test_interface_na_raiz(cliente):
+    resposta = cliente.get("/")
+    assert resposta.status_code == 200
+    assert resposta.headers["content-type"].startswith("text/html")
+    assert 'id="formulario"' in resposta.text and "/consultas" in resposta.text
+
+
 def test_saude(cliente):
     assert cliente.get("/saude").json() == {"status": "ok"}
 
