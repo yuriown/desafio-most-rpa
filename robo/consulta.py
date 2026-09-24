@@ -15,7 +15,7 @@ from playwright.async_api import Error as ErroPlaywright
 from playwright.async_api import TimeoutError as TempoPlaywright
 
 from .config import Config
-from .erros import ErroConsulta, SemResultados, TempoEsgotado
+from .erros import ErroConsulta, NavegadorIndisponivel, SemResultados, TempoEsgotado
 from .modelos import (
     ConsultaEntrada,
     DetalheBeneficio,
@@ -125,6 +125,10 @@ async def executar_consulta(
                 coletado.evidencia = await _evidencia_do_erro(robo)
     except ErroConsulta as e:  # termo inválido: nem chega a abrir o navegador
         erro = e
+    except ErroPlaywright as e:
+        # Só chega aqui o que falhou ao abrir ou fechar o navegador: o fluxo tem o próprio try.
+        log.exception("[%s] navegador não abriu", id_consulta)
+        erro = _navegador_indisponivel(e)
 
     if erro is not None:
         log.info("[%s] terminou com erro %s: %s", id_consulta, erro.codigo, erro.mensagem)
@@ -144,6 +148,15 @@ async def executar_consulta(
         beneficios=coletado.beneficios,
         evidencia=coletado.evidencia,
     )
+
+
+def _navegador_indisponivel(erro: ErroPlaywright) -> NavegadorIndisponivel:
+    if "Executable doesn't exist" in str(erro):
+        return NavegadorIndisponivel(
+            "O navegador do Playwright não está instalado nesta máquina. "
+            "Rode: python -m playwright install chromium"
+        )
+    return NavegadorIndisponivel(f"Não foi possível abrir o navegador: {str(erro).splitlines()[0]}")
 
 
 async def _evidencia_do_erro(robo: RoboPortal) -> Evidencia | None:

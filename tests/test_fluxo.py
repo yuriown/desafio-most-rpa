@@ -8,6 +8,7 @@ import base64
 import functools
 
 import pytest
+from playwright.async_api import Error as ErroPlaywright
 
 from robo import ConsultaEntrada, GerenciadorNavegador, executar_consulta
 from robo.config import Config
@@ -104,6 +105,18 @@ def test_busca_que_nao_responde_vira_tempo_esgotado():
     assert r.status == "erro"
     assert r.codigo_erro == "tempo_esgotado"
     assert r.mensagem == MSG_TEMPO_ESGOTADO
+
+
+def test_navegador_nao_instalado_vira_json_de_erro(monkeypatch):
+    # O erro que o Playwright dá quando o Chromium não foi baixado nesta máquina.
+    async def sem_navegador(self):
+        raise ErroPlaywright("BrowserType.launch: Executable doesn't exist at C:\\x\\chrome-headless-shell.exe")
+
+    monkeypatch.setattr(GerenciadorNavegador, "_garantir_navegador", sem_navegador)
+    r = consultar("FULANO DE TAL")
+    assert r.status == "erro"
+    assert r.codigo_erro == "navegador_indisponivel"
+    assert "playwright install chromium" in r.mensagem
 
 
 def test_termo_invalido_nem_abre_navegador():

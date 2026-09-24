@@ -32,6 +32,12 @@ class TempoEsgotado(ErroConsulta):
         super().__init__(mensagem)
 
 
+class NavegadorIndisponivel(ErroConsulta):
+    """O Chromium não abriu (em geral: não instalado nesta máquina)."""
+
+    codigo = "navegador_indisponivel"
+
+
 class BloqueioAntiBot(ErroConsulta):
     """O portal respondeu com a verificação humana do AWS WAF (CAPTCHA).
 

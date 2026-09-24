@@ -147,7 +147,7 @@ Exemplo completo (gerado com dados fictícios): [docs/exemplo-saida.json](docs/e
 | Filtrado | sobrenome + `filtro_beneficiario_programa_social` | primeiro registro filtrado + evidência |
 
 Outros códigos de erro: `tempo_esgotado` (mesma mensagem de tempo de resposta),
-`bloqueio_anti_bot`, `termo_invalido`, `erro_interno`.
+`bloqueio_anti_bot`, `navegador_indisponivel` (o Chromium do Playwright não está instalado), `termo_invalido`, `erro_interno`.
 
 ## Testes
 
@@ -155,7 +155,7 @@ Outros códigos de erro: `tempo_esgotado` (mesma mensagem de tempo de resposta),
 pytest
 ```
 
-46 testes, **sem acesso à internet**. O fluxo completo (cliques, busca por XHR, acordeões,
+47 testes, **sem acesso à internet**. O fluxo completo (cliques, busca por XHR, acordeões,
 paginação, evidência) roda contra um **portal falso** servido pelo roteamento do Playwright
 ([tests/portal_falso.py](tests/portal_falso.py)), que reproduz a estrutura do portal real
 com dados fictícios. Cobre os cinco cenários acima, o CAPTCHA, o tempo esgotado e quatro

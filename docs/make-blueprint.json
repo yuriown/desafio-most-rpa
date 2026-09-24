@@ -165,7 +165,7 @@
         "body": "{\"id_consulta\": \"{{3.id_consulta}}\", \"status\": \"{{3.status}}\", \"codigo_erro\": \"{{3.codigo_erro}}\", \"link_json\": \"https://drive.google.com/file/d/{{4.id}}/view\"}",
         "headers": [
           {
-            "name": "Content-Type",
+            "key": "Content-Type",
             "value": "application/json"
           }
         ]

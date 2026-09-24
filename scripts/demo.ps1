@@ -14,6 +14,17 @@ if (-not (Select-String -Path (Join-Path $raiz ".env") -Pattern "^ROBO_API_KEY=.
     throw "Defina ROBO_API_KEY no .env antes de expor a API (docs/PARTE2.md, passo 1)."
 }
 
+# O Chromium do Playwright fica fora do projeto (em %LOCALAPPDATA%\ms-playwright). Sem ele,
+# toda consulta falha; confere abrindo o navegador uma vez e, se faltar, instala.
+$ErrorActionPreference = "Continue"  # stderr de programa externo não pode derrubar o script no PowerShell 5
+& $python -c "from playwright.sync_api import sync_playwright as s; p = s().start(); p.chromium.launch(headless=True).close(); p.stop()" 2>$null
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Navegador do Playwright não encontrado; instalando (uns 150 MB)..."
+    & $python -m playwright install chromium
+    if ($LASTEXITCODE -ne 0) { throw "Falhou a instalação do navegador: python -m playwright install chromium" }
+}
+$ErrorActionPreference = "Stop"
+
 $log = Join-Path $env:TEMP "robo-tunel.log"
 Remove-Item $log -ErrorAction SilentlyContinue
 

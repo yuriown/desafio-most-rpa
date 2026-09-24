@@ -88,7 +88,8 @@ fluxo = [
             "status": "200",
             "body": '{"id_consulta": "{{3.id_consulta}}", "status": "{{3.status}}", '
                     '"codigo_erro": "{{3.codigo_erro}}", "link_json": "' + LINK_DRIVE + '"}',
-            "headers": [{"name": "Content-Type", "value": "application/json"}],
+            # Aqui o campo é "key"; no módulo HTTP é "name". Importar com "name" deixa o Key vazio.
+            "headers": [{"key": "Content-Type", "value": "application/json"}],
         },
         nome="Responde a quem chamou",
     ),

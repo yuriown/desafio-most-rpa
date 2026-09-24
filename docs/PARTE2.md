@@ -88,9 +88,11 @@ Só `/consultas` exige a chave; `/saude`, `/docs` e a interface ficam abertas.
    a partir de [exemplo-saida.json](exemplo-saida.json). Sem ela, o cenário funciona igual.
 
 O blueprint é gerado por [scripts/gerar_blueprint_make.py](../scripts/gerar_blueprint_make.py),
-com o formato dos módulos tirado dos exemplos oficiais da Make. Ele não foi testado numa
-importação real, porque isso exige uma conta Make. Se a importação falhar, a opção B monta o
-mesmo fluxo.
+com o formato dos módulos tirado dos exemplos oficiais da Make. Foi importado e rodado numa
+conta real em 24/09/2026: os seis módulos passaram, e três chamadas simultâneas geraram três
+arquivos e três linhas. A primeira importação revelou um defeito (o cabeçalho do módulo 6
+usava `name` onde o Make espera `key`, e o campo vinha vazio), já corrigido no gerador. Se a
+importação falhar mesmo assim, a opção B monta o mesmo fluxo.
 
 ### Opção B: montar à mão
 

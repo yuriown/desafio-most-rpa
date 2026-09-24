@@ -166,3 +166,16 @@ contêineres.
   respondeu, sem chave veio 401 e com chave a consulta voltou 200 em 12,6 s.
 - **Segurança da exposição:** com a API na internet, `/consultas` exige a chave, e o túnel só
   fica de pé durante a demonstração.
+- **Navegador ausente na máquina da demonstração:** no primeiro teste real, o Make recebeu
+  "500" do robô. O Chromium do Playwright fica fora do projeto (`%LOCALAPPDATA%\ms-playwright`)
+  e não tinha sido instalado para aquele usuário. Duas correções: a falha ao abrir o navegador
+  virou um JSON de erro com instrução (`navegador_indisponivel`, "rode `python -m playwright
+  install chromium`"), coberto por teste; e o `scripts/demo.ps1` agora abre o navegador uma vez
+  antes de subir a API e o instala se faltar.
+
+### Resultado do teste real
+Cenário importado numa conta Make, com Drive e Sheets conectados por OAuth. Os seis módulos
+passaram, e três chamadas simultâneas ao webhook geraram três arquivos
+`[id]_[AAAAMMDD_HHMMSS].json` no Drive e três linhas na planilha, cada uma com o link direto do
+seu arquivo. As consultas terminaram em `bloqueio_anti_bot`, porque o portal barrou o
+navegador headless, e mesmo assim foram arquivadas com a mensagem e a evidência, como previsto.
